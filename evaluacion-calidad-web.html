@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evaluación de Calidad Web</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #13151f;
+    --surface2: #1a1d2e;
+    --border: #2a2d42;
+    --accent: #4fffb0;
+    --accent2: #ff6b6b;
+    --accent3: #ffd93d;
+    --text: #e8eaf6;
+    --text-dim: #7b7f9e;
+    --score-1: #ff4757;
+    --score-2: #ff6b35;
+    --score-3: #ffd93d;
+    --score-4: #7bed9f;
+    --score-5: #4fffb0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .hero {
+    background: linear-gradient(135deg, #0c0e14 0%, #13151f 50%, #1a0a2e 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 48px 32px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(79,255,176,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-inner { max-width: 820px; margin: 0 auto; position: relative; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(79,255,176,0.1);
+    border: 1px solid rgba(79,255,176,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+  .badge-dot { width: 6px; height: 6px; background: var(--accent); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+  h1 span { color: var(--accent); }
+  .hero-sub { color: var(--text-dim); font-size: 13px; line-height: 1.7; max-width: 560px; }
+  .methods { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+  .method-tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border-radius: 2px;
+  }
+  .method-tag strong { color: var(--text); }
+
+  /* MAIN */
+  .container { max-width: 820px; margin: 0 auto; padding: 40px 32px 120px; }
+
+  /* META SECTION */
+  .meta-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width:600px){ .meta-grid{grid-template-columns:1fr} }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 11px; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
+  .field input, .field select, .field textarea {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--accent); }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .field select option { background: var(--surface2); }
+  .field.full { grid-column: 1 / -1; }
+
+  /* DIMENSION CARDS */
+  .dimension {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .dim-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .dim-icon {
+    width: 36px; height: 36px;
+    border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .dim-info { flex: 1; }
+  .dim-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 0.5px; }
+  .dim-source { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; margin-top: 2px; }
+  .dim-score-badge {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px; font-weight: 800;
+    min-width: 60px; text-align: right;
+    transition: color 0.3s;
+  }
+
+  /* CRITERIA */
+  .criteria-list { padding: 0; }
+  .criterion {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+    transition: background 0.15s;
+  }
+  .criterion:last-child { border-bottom: none; }
+  .criterion:hover { background: rgba(255,255,255,0.02); }
+  .crit-name { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .crit-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+  /* ── STAR RATING — fixed ───────────────────────────────────────
+     Radio inputs are placed AFTER their labels in DOM order so CSS
+     sibling selectors work left-to-right visually. We use flexbox
+     row-reverse to display them right-to-left so the label order
+     matches the visual 1→5 order. Hover uses :hover ~ label because
+     in row-reverse the visual "previous" stars are DOM siblings AFTER.
+  ─────────────────────────────────────────────────────────────── */
+  .star-rating {
+    display: flex;
+    flex-direction: row-reverse;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .star-rating input[type="radio"] { display: none; }
+  .star-rating label {
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--border);
+    transition: color 0.12s, transform 0.1s;
+    line-height: 1;
+    user-select: none;
+  }
+  /* Hover: light up hovered star AND all stars to its left (higher value = earlier in row-reverse DOM) */
+  .star-rating label:hover,
+  .star-rating label:hover ~ label {
+    color: var(--accent3);
+    transform: scale(1.1);
+  }
+  /* Star selected state is handled entirely by JS — see updateStarVisual() */
+
+  /* EVIDENCE */
+  .evidence-section {
+    background: rgba(79,255,176,0.03);
+    border: 1px dashed rgba(79,255,176,0.2);
+    border-radius: 4px;
+    padding: 20px 24px;
+    margin: 0 24px 24px;
+  }
+  .evidence-section .field label { color: var(--accent); }
+
+  /* SCORE PANEL */
+  .score-panel {
+    position: sticky;
+    bottom: 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 24px;
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    z-index: 10;
+    animation: fadeUp 0.6s ease 0.4s both;
+  }
+  .score-total-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--text-dim);
+  }
+  .score-total-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 40px; font-weight: 800; line-height: 1;
+    transition: color 0.3s;
+  }
+  .score-total-max { font-size: 14px; color: var(--text-dim); }
+  .score-bar-wrap { flex: 1; min-width: 140px; }
+  .score-bar-track { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+  .score-bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s; background: var(--accent); }
+  .score-label { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; }
+  .score-breakdown { display: flex; gap: 10px; flex-wrap: wrap; flex: 2; }
+  .score-dim { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 46px; }
+  .score-dim-val { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; }
+  .score-dim-name { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-align: center; }
+
+  /* ACTIONS */
+  .actions { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
+  .btn {
+    font-family: 'Syne', sans-serif;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 14px 28px; border-radius: 3px; border: none;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary { background: var(--accent); color: #0c0e14; }
+  .btn-primary:hover { background: #6fffbe; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(79,255,176,0.3); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center; justify-content: center;
+    padding: 24px;
+    overflow-y: auto;
+  }
+  .modal-overlay.active { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    max-width: 700px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin: auto;
+  }
+  @keyframes modalIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+  .modal-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0;
+    background: var(--surface);
+    z-index: 2;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+  .modal-close {
+    width: 32px; height: 32px;
+    border: 1px solid var(--border); border-radius: 3px;
+    background: transparent; color: var(--text-dim);
+    cursor: pointer; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .modal-close:hover { border-color: var(--accent2); color: var(--accent2); }
+  .modal-body { padding: 28px 32px; }
+  .result-score-big { text-align: center; padding: 28px 0; }
+  .result-score-num { font-family: 'Syne', sans-serif; font-size: 80px; font-weight: 800; line-height: 1; }
+  .result-score-denom { font-size: 28px; color: var(--text-dim); }
+  .result-verdict {
+    font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; margin-top: 8px;
+  }
+  .result-dims { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 24px 0; }
+  @media(max-width:500px){ .result-dims{ grid-template-columns: 1fr; } }
+  .result-dim-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 14px;
+  }
+  .result-dim-name { font-size: 10px; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+  .result-dim-score { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+  .result-dim-max { font-size: 12px; color: var(--text-dim); }
+  .result-dim-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .result-dim-bar-fill { height: 100%; border-radius: 2px; }
+
+  #result-text {
+    white-space: pre-wrap;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 20px;
+    font-size: 12px; line-height: 1.8;
+    color: var(--text-dim); font-family: 'DM Mono', monospace;
+    max-height: 320px; overflow-y: auto;
+  }
+
+  /* Notification toast */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--accent); color: #0c0e14;
+    font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700;
+    letter-spacing: 1px; padding: 10px 24px; border-radius: 3px;
+    opacity: 0; transition: all 0.3s; z-index: 200; pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media print {
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .modal-overlay, .score-panel, .actions, .toast { display: none !important; }
+    .hero { padding: 20px 24px; }
+    .hero::before { display: none; }
+    .badge-dot { animation: none; }
+    .container { padding: 20px 24px 40px; }
+    .dimension { break-inside: avoid; }
+    body { background: white !important; color: #111 !important; }
+    .meta-card, .dimension { background: #f9f9f9 !important; border-color: #ccc !important; }
+    .dim-header { background: #efefef !important; }
+    .field input, .field select, .field textarea { background: white !important; border-color: #ccc !important; color: #111 !important; }
+    .evidence-section { border-color: #aaa !important; background: #f5f5f5 !important; }
+    .star-rating label { font-size: 18px; }
+    .crit-desc, .dim-source, .hero-sub, .method-tag { color: #555 !important; }
+    h1, .dim-name, .section-label { color: #111 !important; }
+    h1 span { color: #1a7a50 !important; }
+  }
+
+  @media(max-width:600px){
+    .container { padding: 24px 16px 120px; }
+    .hero { padding: 32px 16px 28px; }
+    .dim-header { flex-wrap: wrap; }
+    .score-panel { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .modal-body { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="badge"><span class="badge-dot"></span> Instrumento de Evaluación</div>
+    <h1>Calidad de <span>Sitios Web</span></h1>
+    <p class="hero-sub">Formulario basado en metodologías WebQEM y WebQual 4.0 para la evaluación entre pares de proyectos web estudiantiles.</p>
+    <div class="methods">
+      <div class="method-tag"><strong>WebQEM</strong> — Web Quality Evaluation Method</div>
+      <div class="method-tag"><strong>WebQual 4.0</strong> — Barnes &amp; Vidgen</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- META -->
+  <div class="meta-card">
+    <div class="section-label">Datos generales</div>
+    <div class="meta-grid">
+      <div class="field">
+        <label>Nombre del evaluador</label>
+        <input type="text" id="evaluador" placeholder="Tu nombre completo">
+      </div>
+      <div class="field">
+        <label>Equipo / Proyecto evaluado</label>
+        <input type="text" id="proyecto" placeholder="Nombre del equipo o proyecto">
+      </div>
+      <div class="field">
+        <label>URL del sitio evaluado</label>
+        <input type="url" id="url" placeholder="https://...">
+      </div>
+      <div class="field">
+        <label>Fecha de evaluación</label>
+        <input type="date" id="fecha">
+      </div>
+      <div class="field">
+        <label>Materia / Grupo</label>
+        <input type="text" id="materia" placeholder="Ej. Desarrollo Web – 4°B">
+      </div>
+      <div class="field">
+        <label>Tipo de sitio web</label>
+        <select id="tipo">
+          <option value="">Selecciona...</option>
+          <option>Portafolio personal</option>
+          <option>Sitio informativo</option>
+          <option>Tienda en línea / E-commerce</option>
+          <option>Blog</option>
+          <option>Landing page</option>
+          <option>Aplicación web</option>
+          <option>Otro</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIMENSIONES — generadas por JS -->
+  <div id="dimensions-container"></div>
+
+  <!-- SCORE PANEL -->
+  <div class="score-panel">
+    <div>
+      <div class="score-total-label">Puntuación total</div>
+      <div>
+        <span class="score-total-value" id="total-score">0</span>
+        <span class="score-total-max">/40</span>
+      </div>
+    </div>
+    <div class="score-bar-wrap">
+      <div class="score-bar-track"><div class="score-bar-fill" id="score-bar"></div></div>
+      <div class="score-label" id="score-label" style="color:var(--text-dim)">Sin calificar</div>
+    </div>
+    <div class="score-breakdown" id="score-breakdown"></div>
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="actions">
+    <button class="btn btn-primary" onclick="showResult()">Ver resultado completo</button>
+    <button class="btn btn-secondary" onclick="resetForm()">Limpiar formulario</button>
+  </div>
+</div>
+
+<!-- RESULT MODAL -->
+<div class="modal-overlay" id="modal" onclick="handleOverlayClick(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Resultado de Evaluación</div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="result-score-big">
+        <div class="result-score-num" id="r-total">0<span class="result-score-denom">/40</span></div>
+        <div class="result-verdict" id="r-verdict"></div>
+      </div>
+      <div class="result-dims" id="r-dims"></div>
+      <div class="section-label" style="margin-bottom:16px">Resumen exportable</div>
+      <div id="result-text"></div>
+      <div class="actions" style="margin-top:20px">
+        <button class="btn btn-primary" id="copy-btn" onclick="copyResult(this)">Copiar resumen</button>
+        <button class="btn btn-secondary" onclick="closeModal(); setTimeout(()=>window.print(),200)">Imprimir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">¡Copiado al portapapeles!</div>
+
+<script>
+const dimensions = [
+  {
+    id: 'usabilidad', name: 'Usabilidad', icon: 'bi-cursor', color: '#4fffb0',
+    source: 'WebQual 4.0 — Dimensión 1',
+    criteria: [
+      { id: 'nav',    name: 'Navegación intuitiva',    max: 4, desc: 'Los menús y rutas de navegación son claros y predecibles para el usuario.' },
+      { id: 'diseno', name: 'Diseño visual coherente', max: 2, desc: 'Colores, tipografías y elementos visuales siguen un estilo uniforme.' },
+    ]
+  },
+  {
+    id: 'contenido', name: 'Calidad del contenido', icon: 'bi-file-earmark-text', color: '#ffd93d',
+    source: 'WebQEM — Atributo: Contenido',
+    criteria: [
+      { id: 'relevancia', name: 'Relevancia y utilidad de la información', max: 4, desc: 'El contenido responde al propósito del sitio y es útil para el usuario objetivo.' },
+      { id: 'redaccion',  name: 'Ortografía y redacción',                  max: 2, desc: 'El texto está bien escrito, sin errores ortográficos ni gramaticales.' },
+    ]
+  },
+  {
+    id: 'funcionalidad', name: 'Funcionalidad', icon: 'bi-gear', color: '#ff9f43',
+    source: 'WebQEM — Atributo: Funcionalidad',
+    criteria: [
+      { id: 'links',       name: 'Links y botones operativos',  max: 4, desc: 'Todos los hipervínculos y botones llevan a donde indican y no presentan errores 404.' },
+      { id: 'formularios', name: 'Formularios e interacciones', max: 2, desc: 'Los formularios de contacto, búsqueda o registro funcionan correctamente.' },
+    ]
+  },
+  {
+    id: 'accesibilidad', name: 'Accesibilidad', icon: 'bi-universal-access', color: '#a29bfe',
+    source: 'WebQEM — Atributo: Accesibilidad',
+    criteria: [
+      { id: 'contraste',  name: 'Contraste y legibilidad', max: 2, desc: 'El contraste entre texto y fondo permite una lectura cómoda (WCAG 2.1).' },
+      { id: 'responsive', name: 'Diseño responsivo',        max: 4, desc: 'El sitio se adapta correctamente a distintos tamaños de pantalla (móvil, tablet, escritorio).' },
+    ]
+  },
+  {
+    id: 'rendimiento', name: 'Rendimiento', icon: 'bi-lightning-charge', color: '#ff6b6b',
+    source: 'WebQEM — Atributo: Eficiencia',
+    criteria: [
+      { id: 'velocidad', name: 'Velocidad de carga',       max: 4, desc: 'Las páginas cargan en un tiempo razonable (< 3 segundos en condiciones normales).' },
+      { id: 'imagenes',  name: 'Optimización de recursos', max: 2, desc: 'Imágenes y archivos tienen tamaños apropiados; no bloquean la carga.' },
+    ]
+  },
+  {
+    id: 'confianza', name: 'Confianza e identidad', icon: 'bi-shield-check', color: '#74b9ff',
+    source: 'WebQual 4.0 — Dimensión 3',
+    criteria: [
+      { id: 'autoria',   name: 'Información de autoría y contacto', max: 2, desc: 'El sitio muestra claramente quién lo creó y cómo contactarlos.' },
+      { id: 'seguridad', name: 'Indicadores de seguridad',          max: 2, desc: 'Uso de HTTPS, políticas de privacidad u otros elementos que transmiten confianza.' },
+    ]
+  },
+  {
+    id: 'experiencia', name: 'Experiencia del usuario', icon: 'bi-stars', color: '#fd79a8',
+    source: 'WebQual 4.0 — Dimensión 2',
+    criteria: [
+      { id: 'interaccion', name: 'Interactividad y dinamismo', max: 2, desc: 'El sitio ofrece elementos interactivos que enriquecen la experiencia (animaciones, feedback).' },
+      { id: 'objetivo',    name: 'Cumplimiento del objetivo',  max: 4, desc: 'El sitio logra el propósito para el que fue diseñado de forma efectiva.' },
+    ]
+  }
+];
+
+/* ── BUILD DIMENSION CARDS ── */
+const container = document.getElementById('dimensions-container');
+
+dimensions.forEach((dim, di) => {
+  const card = document.createElement('div');
+  card.className = 'dimension';
+  card.style.animationDelay = `${di * 0.06}s`;
+
+  /* Build criteria rows.
+     Stars use row-reverse layout so CSS sibling selectors work correctly:
+     DOM order per row = radio5, label5, radio4, label4, ..., radio1, label1
+     Visual order (row-reverse) = label1 ★ label2 ★ ... label5            */
+  const criteriaHTML = dim.criteria.map(c => {
+    const starsHTML = Array.from({length: c.max}, (_, i) => c.max - i).map(n => `
+      <input type="radio" name="${c.id}" id="${c.id}-${n}" value="${n}">
+      <label for="${c.id}-${n}" title="${n} de ${c.max}">★</label>
+    `).join('');
+
+    return `
+      <div class="criterion">
+        <div class="crit-text">
+          <div class="crit-name">${c.name} <span style="color:var(--text-dim);font-size:10px;letter-spacing:1px">/${c.max}</span></div>
+          <div class="crit-desc">${c.desc}</div>
+        </div>
+        <div class="star-rating" id="stars-${c.id}" data-max="${c.max}">${starsHTML}</div>
+      </div>`;
+  }).join('');
+
+  card.innerHTML = `
+    <div class="dim-header">
+      <div class="dim-icon" style="background:${dim.color}22;color:${dim.color}"><i class="bi ${dim.icon}"></i></div>
+      <div class="dim-info">
+        <div class="dim-name">${dim.name}</div>
+        <div class="dim-source">${dim.source}</div>
+      </div>
+      <div class="dim-score-badge" id="dim-score-${dim.id}" style="color:${dim.color}">—</div>
+    </div>
+    <div class="criteria-list">${criteriaHTML}</div>
+    <div class="evidence-section">
+      <div class="field">
+        <label>Evidencia / Observaciones de esta dimensión</label>
+        <textarea id="obs-${dim.id}" placeholder="Describe brevemente qué encontraste, incluye URL específicas o capturas que sustenten tu evaluación..."></textarea>
+      </div>
+    </div>`;
+
+  container.appendChild(card);
+});
+
+/* ── STAR VISUAL COLORING (JS, works for any max) ── */
+const scoreColors = ['var(--score-1)','var(--score-2)','var(--score-3)','var(--score-4)','var(--score-5)'];
+
+function updateStarVisual(group, val, max) {
+  const labels = Array.from(group.querySelectorAll('label'));
+  // row-reverse: last label in DOM = star 1 visually, first = star max
+  // labels array index 0 = highest value star (max), last = star 1
+  labels.forEach((label, i) => {
+    const starValue = max - i; // DOM position maps to this star value
+    if (val > 0 && starValue <= val) {
+      // pick color based on how far along the scale val is
+      const colorIdx = Math.min(Math.ceil((val / max) * 5) - 1, 4);
+      label.style.color = scoreColors[colorIdx];
+    } else {
+      label.style.color = '';
+    }
+  });
+  group.dataset.val = val || '';
+}
+
+/* ── ATTACH CHANGE LISTENERS ── */
+dimensions.forEach(dim => {
+  dim.criteria.forEach(c => {
+    const group = document.getElementById(`stars-${c.id}`);
+    group.addEventListener('change', () => {
+      const checked = group.querySelector('input:checked');
+      const val = checked ? parseInt(checked.value) : 0;
+      updateStarVisual(group, val, c.max);
+      updateScores();
+    });
+  });
+});
+
+/* ── SCORING ── */
+function getScoreColor(score, max) {
+  const pct = score / max;
+  if (pct === 0)   return 'var(--text-dim)';
+  if (pct <= 0.30) return 'var(--score-1)';
+  if (pct <= 0.50) return 'var(--score-2)';
+  if (pct <= 0.70) return 'var(--score-3)';
+  if (pct <= 0.86) return 'var(--score-4)';
+  return 'var(--score-5)';
+}
+
+function updateScores() {
+  let total = 0;
+  const breakdownEl = document.getElementById('score-breakdown');
+  breakdownEl.innerHTML = '';
+
+  dimensions.forEach(dim => {
+    let dimTotal = 0;
+    const dimMax = dim.criteria.reduce((sum, c) => sum + c.max, 0);
+
+    dim.criteria.forEach(c => {
+      const checked = document.querySelector(`input[name="${c.id}"]:checked`);
+      dimTotal += checked ? parseInt(checked.value) : 0;
+    });
+    total += dimTotal;
+
+    document.getElementById(`dim-score-${dim.id}`).textContent = `${dimTotal}/${dimMax}`;
+
+    const el = document.createElement('div');
+    el.className = 'score-dim';
+    const color = getScoreColor(dimTotal, dimMax);
+    el.innerHTML = `<div class="score-dim-val" style="color:${color}">${dimTotal}</div>
+                    <div class="score-dim-name">${dim.name.split(' ')[0]}</div>`;
+    breakdownEl.appendChild(el);
+  });
+
+  const MAX = 40;
+  const pct = (total / MAX) * 100;
+  document.getElementById('total-score').textContent = total;
+  document.getElementById('score-bar').style.width = pct + '%';
+
+  const color = getScoreColor(total, MAX);
+  document.getElementById('score-bar').style.background = color;
+  document.getElementById('total-score').style.color = color;
+
+  const labels = [
+    [0,    'Sin calificar'],
+    [0.30, 'Deficiente'],
+    [0.50, 'Por mejorar'],
+    [0.70, 'Aceptable'],
+    [0.86, 'Bueno'],
+    [1.01, 'Excelente'],
+  ];
+  let labelText = 'Sin calificar';
+  for (const [threshold, text] of labels) {
+    if (pct / 100 >= threshold) labelText = text;
+  }
+  if (total === 0) labelText = 'Sin calificar';
+
+  const scoreLabel = document.getElementById('score-label');
+  scoreLabel.textContent = labelText;
+  scoreLabel.style.color = color;
+}
+
+/* ── RESULT MODAL ── */
+function getVerdict(score) {
+  if (score === 0)   return { text: 'SIN CALIFICAR', color: 'var(--text-dim)' };
+  if (score <= 10)   return { text: 'DEFICIENTE',    color: 'var(--score-1)' };
+  if (score <= 18)   return { text: 'POR MEJORAR',   color: 'var(--score-2)' };
+  if (score <= 26)   return { text: 'ACEPTABLE',     color: 'var(--score-3)' };
+  if (score <= 34)   return { text: 'BUENO',         color: 'var(--score-4)' };
+  return              { text: 'EXCELENTE',            color: 'var(--score-5)' };
+}
+
+function showResult() {
+  const evaluador = document.getElementById('evaluador').value.trim() || 'Sin nombre';
+  const proyecto  = document.getElementById('proyecto').value.trim()  || 'Sin especificar';
+  const url       = document.getElementById('url').value.trim()       || 'No indicada';
+  const fecha     = document.getElementById('fecha').value            || 'No indicada';
+  const materia   = document.getElementById('materia').value.trim()   || 'No indicada';
+  const tipo      = document.getElementById('tipo').value             || 'No indicado';
+
+  let total = 0;
+  const lines = [
+    `EVALUACIÓN DE CALIDAD WEB`,
+    `═══════════════════════════════════════`,
+    `Evaluador : ${evaluador}`,
+    `Proyecto  : ${proyecto}`,
+    `URL       : ${url}`,
+    `Fecha     : ${fecha}`,
+    `Materia   : ${materia}`,
+    `Tipo      : ${tipo}`,
+    ``
+  ];
+
+  const dimsHTML = [];
+
+  dimensions.forEach(dim => {
+    let dimTotal = 0;
+    const dimMax = dim.criteria.reduce((sum, c) => sum + c.max, 0);
+    const dimLines = [];
+
+    dim.criteria.forEach(c => {
+      const checked = document.querySelector(`input[name="${c.id}"]:checked`);
+      const val = checked ? parseInt(checked.value) : 0;
+      dimTotal += val;
+      dimLines.push(`  · ${c.name}: ${'*'.repeat(val)}${'-'.repeat(c.max-val)} (${val}/${c.max})`);
+    });
+    total += dimTotal;
+
+    lines.push(`[${dim.name.toUpperCase()}]`);
+    const obs = document.getElementById(`obs-${dim.id}`).value.trim();
+    lines.push(obs ? `  ${obs}` : `  (sin observaciones)`);
+    lines.push('');
+
+    const pct = (dimTotal / dimMax) * 100;
+    dimsHTML.push(`
+      <div class="result-dim-card">
+        <div class="result-dim-name"><i class="bi ${dim.icon}" style="color:${dim.color};margin-right:6px"></i>${dim.name}</div>
+        <div class="result-dim-score" style="color:${dim.color}">${dimTotal}<span class="result-dim-max">/${dimMax}</span></div>
+        <div class="result-dim-bar">
+          <div class="result-dim-bar-fill" style="width:${pct}%;background:${dim.color}"></div>
+        </div>
+      </div>`);
+  });
+
+  const verdict = getVerdict(total);
+  lines.push(`─────────────────────────────────────`);
+  lines.push(`PUNTUACIÓN TOTAL: ${total}/40 — ${verdict.text}`);
+
+  document.getElementById('r-total').innerHTML = `${total}<span class="result-score-denom">/50</span>`;
+  document.getElementById('r-total').style.color = verdict.color;
+  document.getElementById('r-verdict').textContent = verdict.text;
+  document.getElementById('r-verdict').style.color = verdict.color;
+  document.getElementById('r-dims').innerHTML = dimsHTML.join('');
+  document.getElementById('result-text').textContent = lines.join('\n');
+
+  document.getElementById('modal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal')) closeModal();
+}
+
+/* Close on Escape */
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ── COPY BUTTON ── */
+function copyResult(btn) {
+  const text = document.getElementById('result-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('¡Copiado al portapapeles!');
+  }).catch(() => {
+    /* Fallback for browsers without clipboard API */
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('¡Copiado!');
+  });
+}
+
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2500);
+}
+
+/* ── RESET ── */
+function resetForm() {
+  if (!confirm('¿Seguro que quieres limpiar todo el formulario?')) return;
+
+  document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+  document.querySelectorAll('.star-rating').forEach(g => {
+    g.dataset.val = '';
+    g.querySelectorAll('label').forEach(l => l.style.color = '');
+  });
+  document.querySelectorAll('input[type="text"], input[type="url"], input[type="date"], select, textarea')
+    .forEach(el => el.value = '');
+
+  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+  updateScores();
+}
+
+/* ── INIT ── */
+document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+updateScores();
+</script>
+</body>
+</html>
