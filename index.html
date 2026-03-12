@@ -359,22 +359,21 @@
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media print {
-    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; color: #111 !important; background: white !important; border-color: #ccc !important; }
     .modal-overlay, .score-panel, .actions, .toast { display: none !important; }
     .hero { padding: 20px 24px; }
     .hero::before { display: none; }
     .badge-dot { animation: none; }
     .container { padding: 20px 24px 40px; }
     .dimension { break-inside: avoid; }
-    body { background: white !important; color: #111 !important; }
-    .meta-card, .dimension { background: #f9f9f9 !important; border-color: #ccc !important; }
+    .meta-card, .dimension { background: #f9f9f9 !important; }
     .dim-header { background: #efefef !important; }
-    .field input, .field select, .field textarea { background: white !important; border-color: #ccc !important; color: #111 !important; }
-    .evidence-section { border-color: #aaa !important; background: #f5f5f5 !important; }
-    .star-rating label { font-size: 18px; }
-    .crit-desc, .dim-source, .hero-sub, .method-tag { color: #555 !important; }
-    h1, .dim-name, .section-label { color: #111 !important; }
-    h1 span { color: #1a7a50 !important; }
+    .field input, .field select, .field textarea { background: white !important; }
+    .evidence-section { background: #f5f5f5 !important; }
+    .star-rating label { font-size: 18px; color: #111 !important; }
+    .dim-score-badge { color: #111 !important; }
+    h1 span { color: #111 !important; }
+    .section-label::after { background: #ccc !important; }
   }
 
   @media(max-width:600px){
@@ -765,7 +764,7 @@ function showResult() {
   lines.push(`─────────────────────────────────────`);
   lines.push(`PUNTUACIÓN TOTAL: ${total}/40 — ${verdict.text}`);
 
-  document.getElementById('r-total').innerHTML = `${total}<span class="result-score-denom">/50</span>`;
+  document.getElementById('r-total').innerHTML = `${total}<span class="result-score-denom">/40</span>`;
   document.getElementById('r-total').style.color = verdict.color;
   document.getElementById('r-verdict').textContent = verdict.text;
   document.getElementById('r-verdict').style.color = verdict.color;
